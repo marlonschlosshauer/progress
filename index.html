@@ -1,67 +1,61 @@
 <!doctype html>
 <html lang="de">
-  <head>
-	<title>IT-Recht</title>
+    <head>
+	<title></title>
 	<meta charset="utf-8">
 	<link rel="stylesheet" href="src/css/styles.css">
 	<style>
 	 .container {
-		 display: grid;
-		 padding-top: 15vh;
-		 justify-content: center;
-		 grid-gap: 50px;
+	     display: grid;
+	     padding-top: 15vh;
+	     justify-content: center;
+	     grid-gap: 50px;
 	 }
 
 	 #title {
-		 margin: auto;
+	     margin: auto;
 	 }
 
 	 #prog {
-		 width: 50vw;
-		 max-width: 1200px;
+	     width: 50vw;
+	     max-width: 1200px;
 	 }
 	</style>
-  </head>
-  <body>
+    </head>
+    <body>
 	<div class="container">
-	  <h2 id="title" style="font-family: sans-serif">Progress:</h2>
-	  <progress id="prog" max="100" value="70"></progress>
+	    <h2 id="title" style="font-family: sans-serif">Progress:</h2>
+	    <progress id="prog" max="100" value="70"></progress>
 	</div>
 	<script>
 
 	 // Set start to now and end to now + 90 minutes
-	 let start = new Date();
-	 let end = new Date(start.valueOf() + (90 * 60 * 1000));
+	 const options = {start: new Date(), end: new Date(new Date().valueOf() + (90 * 60 * 1000))}
 
-	 const params = new URLSearchParams(window.location.search);
-	 if ( params ) {
-	   if (params.has('title')) {
-		 document.getElementById('title').innerHTML = params.get('title');
-	   }
-
-	   if (params.has('start')) {
-		 start = new Date(params.get('start'));
-	   }
-	   if (params.has('end')) {
-		 end = new Date(params.get('end'));
-	   }
+	 // Try to parse start, end from url-params
+	 for (const [key, value] of new URLSearchParams(window.location.search)) {
+	     options[key]= new Date(
+		 // Check if unix-timestamp or Date string
+		 (/^\d+$/.test(value))
+		 ?  parseInt(value)
+		 : value
+	     )
 	 }
 
-	 function remaining() {
-	   const now = new Date(new Date().valueOf() - start.valueOf());
-	   const remain = new Date(end.valueOf() - start.valueOf()).valueOf();
-
-	   return Math.floor((now.valueOf() / remain.valueOf()) * 100);
+	 function remaining(start, end) {
+	     const now = new Date(new Date().valueOf() - start.valueOf());
+	     const remain = new Date(end.valueOf() - start.valueOf()).valueOf();
+	     return Math.floor((now.valueOf() / remain.valueOf()) * 100);
 	 }
 
-	 function update() {
-	   let left = remaining();
-	   document.title = left + '%';
-	   document.getElementById("prog").value = left;
+	 function update(start, end) {
+	     const left = remaining(start, end);
+	     document.title = left + '%';
+	     document.getElementById("prog").value = left;
 	 }
-	 update();
+	 update(...Object.values(options));
 
-	 setInterval(update, 1000 * 60);
+	 setInterval(() => update(...Object.values(options)), 1000 * 60);
 	</script>
-  </body>
+    </body>
 </html>
